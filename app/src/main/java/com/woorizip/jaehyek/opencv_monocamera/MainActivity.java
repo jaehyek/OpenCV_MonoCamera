@@ -1,4 +1,5 @@
 package com.woorizip.jaehyek.opencv_monocamera;
+
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -19,7 +21,8 @@ import org.opencv.core.Mat;
 
 
 public class MainActivity extends AppCompatActivity
-        implements CameraBridgeViewBase.CvCameraViewListener2 {
+        implements CameraBridgeViewBase.CvCameraViewListener2
+{
 
     private static final String TAG = "opencv";
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -29,32 +32,38 @@ public class MainActivity extends AppCompatActivity
     public native void ConvertRGBtoGray(long matAddrInput, long matAddrResult);
 
 
-    static {
+    static
+    {
         System.loadLibrary("opencv_java");
         System.loadLibrary("OpenCVMonoCamera");
     }
 
 
-
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this)
+    {
         @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
+        public void onManagerConnected(int status)
+        {
+            switch (status)
+            {
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     mOpenCvCameraView.enableView();
-                } break;
+                }
+                break;
                 default:
                 {
                     super.onManagerConnected(status);
-                } break;
+                }
+                break;
             }
         }
     };
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -64,16 +73,18 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
             //퍼미션 상태 확인
-            if (!hasPermissions(PERMISSIONS)) {
+            if (!hasPermissions(PERMISSIONS))
+            {
 
                 //퍼미션 허가 안되어있다면 사용자에게 요청
                 requestPermissions(PERMISSIONS, PERMISSIONS_REQUEST_CODE);
             }
         }
 
-        mOpenCvCameraView = (CameraBridgeViewBase)findViewById(R.id.activity_surface_view);
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.activity_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setCameraIndex(0); // front-camera(1),  back-camera(0)
@@ -93,16 +104,19 @@ public class MainActivity extends AppCompatActivity
     {
         super.onResume();
 
-        if (!OpenCVLoader.initDebug()) {
+        if (!OpenCVLoader.initDebug())
+        {
             Log.d(TAG, "onResume :: Internal OpenCV library not found.");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_13, this, mLoaderCallback);
-        } else {
+        } else
+        {
             Log.d(TAG, "onResum :: OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
 
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
 
         if (mOpenCvCameraView != null)
@@ -110,21 +124,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCameraViewStarted(int width, int height) {
+    public void onCameraViewStarted(int width, int height)
+    {
 
     }
 
     @Override
-    public void onCameraViewStopped() {
+    public void onCameraViewStopped()
+    {
 
     }
 
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame)
+    {
 
         matInput = inputFrame.rgba();
 
-        if ( matResult != null ) matResult.release();
+        if (matResult != null) matResult.release();
         matResult = new Mat(matInput.rows(), matInput.cols(), matInput.type());
 
         ConvertRGBtoGray(matInput.getNativeObjAddr(), matResult.getNativeObjAddr());
@@ -133,21 +150,23 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     //여기서부턴 퍼미션 관련 메소드
     static final int PERMISSIONS_REQUEST_CODE = 1000;
-    String[] PERMISSIONS  = {"android.permission.CAMERA"};
+    String[] PERMISSIONS = {"android.permission.CAMERA"};
 
 
-    private boolean hasPermissions(String[] permissions) {
+    private boolean hasPermissions(String[] permissions)
+    {
         int result;
 
         //스트링 배열에 있는 퍼미션들의 허가 상태 여부 확인
-        for (String perms : permissions){
+        for (String perms : permissions)
+        {
 
             result = ContextCompat.checkSelfPermission(this, perms);
 
-            if (result == PackageManager.PERMISSION_DENIED){
+            if (result == PackageManager.PERMISSION_DENIED)
+            {
                 //허가 안된 퍼미션 발견
                 return false;
             }
@@ -158,16 +177,18 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+                                           @NonNull int[] grantResults)
+    {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch(requestCode){
+        switch (requestCode)
+        {
 
             case PERMISSIONS_REQUEST_CODE:
-                if (grantResults.length > 0) {
+                if (grantResults.length > 0)
+                {
                     boolean cameraPermissionAccepted = grantResults[0]
                             == PackageManager.PERMISSION_GRANTED;
 
@@ -180,19 +201,24 @@ public class MainActivity extends AppCompatActivity
 
 
     @TargetApi(Build.VERSION_CODES.M)
-    private void showDialogForPermission(String msg) {
+    private void showDialogForPermission(String msg)
+    {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder( MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("알림");
         builder.setMessage(msg);
         builder.setCancelable(false);
-        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id){
+        builder.setPositiveButton("예", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
                 requestPermissions(PERMISSIONS, PERMISSIONS_REQUEST_CODE);
             }
         });
-        builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
+        builder.setNegativeButton("아니오", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface arg0, int arg1)
+            {
                 finish();
             }
         });
